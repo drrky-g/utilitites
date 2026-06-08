@@ -1,0 +1,21 @@
+## .NET / C#
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+coverage.cobertura.xml
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/
+!.vscode/extensions.json
+
+## OS
+.DS_Store
+Thumbs.db

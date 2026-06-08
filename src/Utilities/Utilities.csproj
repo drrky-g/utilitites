@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Utilities</AssemblyName>
+    <RootNamespace>Utilities</RootNamespace>
+    <Description>A general-purpose utility library providing cross-cutting concerns like structured logging helpers, built on Microsoft.Extensions.Logging abstractions.</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Only the abstractions — zero opinion forced on consumers -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
