@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "dev" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "dev" ]
 
 # Cancel in-progress runs for the same branch/PR when a new commit is pushed
 concurrency:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dotnet-version: [ "8.0.x", "9.0.x" ]
+        dotnet-version: [ "10.0.x" ]
 
     steps:
       - name: Checkout
