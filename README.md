@@ -3,7 +3,7 @@
 A `netstandard2.0` utility library providing cross-cutting concerns for .NET applications.
 Built on `Microsoft.Extensions.Logging` abstractions — no logging backend is forced on consumers.
 
-![CI](https://github.com/your-org/utilities/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/drrky-g/utilitites/actions/workflows/ci.yml/badge.svg)
 
 ---
 
@@ -18,8 +18,8 @@ Built on `Microsoft.Extensions.Logging` abstractions — no logging backend is f
 ## Getting Started
 
 ```bash
-git clone https://github.com/your-org/utilities.git
-cd utilities
+git clone https://github.com/drrky-g/utilitites.git
+cd utilitites
 dotnet restore
 dotnet build
 dotnet test
@@ -53,14 +53,62 @@ public class OrderService
 
             _logger.OperationCompleted("ProcessOrder", sw.Elapsed.TotalMilliseconds);
         }
+        catch (HttpRequestException ex)
+        {
+            _logger.DependencyCallFailed("PaymentGateway", sw.Elapsed.TotalMilliseconds, ex);
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.OperationFailed("ProcessOrder", sw.Elapsed.TotalMilliseconds, ex);
             throw;
         }
     }
+
+    public bool ValidateOrder(Order order)
+    {
+        if (string.IsNullOrEmpty(order.Email))
+        {
+            _logger.ValidationFailed("Email", "must not be empty");
+            return false;
+        }
+        return true;
+    }
 }
 ```
+
+---
+
+## API Reference
+
+All extension methods live on `ILogger` in the `Utilities.Logging` namespace.
+
+### Operation timing
+
+| Method | Log level | Event ID |
+|---|---|---|
+| `OperationCompleted(operationName, elapsedMs)` | Information | 1000 |
+| `OperationFailed(operationName, elapsedMs, exception?)` | Error | 1001 |
+
+### Dependency / external call tracing
+
+| Method | Log level | Event ID |
+|---|---|---|
+| `DependencyCallStarted(dependencyName, targetAddress)` | Debug | 2000 |
+| `DependencyCallCompleted(dependencyName, statusCode, elapsedMs)` | Debug | 2001 |
+| `DependencyCallFailed(dependencyName, elapsedMs, exception?)` | Error | 2002 |
+
+### Validation
+
+| Method | Log level | Event ID |
+|---|---|---|
+| `ValidationFailed(fieldName, reason)` | Warning | 3000 |
+
+### Scope helpers
+
+| Method | Returns |
+|---|---|
+| `BeginOperationScope(operationName, correlationId?)` | `IDisposable?` — attaches `OperationName` and `CorrelationId` as structured properties to all log entries within the scope |
 
 ---
 
