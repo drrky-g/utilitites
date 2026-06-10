@@ -1,7 +1,7 @@
 # Utilities
 
-A `netstandard2.0` utility library providing cross-cutting concerns for .NET applications.
-Built on `Microsoft.Extensions.Logging` abstractions — no logging backend is forced on consumers.
+A `netstandard2.0` utility library providing cross-cutting concerns for .NET applications:
+structured logging helpers, dependency call tracing, and validation failure reporting.
 
 ![CI](https://github.com/drrky-g/utilitites/actions/workflows/ci.yml/badge.svg)
 
@@ -11,7 +11,7 @@ Built on `Microsoft.Extensions.Logging` abstractions — no logging backend is f
 
 | Namespace | What's in it |
 |---|---|
-| `Utilities.Logging` | `LoggingExtensions` — structured, high-performance logging helpers via `LoggerMessage.Define` |
+| `Utilities.Logging` | `LoggingExtensions` — operation timing (`OperationCompleted`, `OperationFailed`), dependency call tracing (`DependencyCallStarted/Completed/Failed`), validation failures (`ValidationFailed`), and structured scopes (`BeginOperationScope`) |
 
 ---
 
@@ -27,7 +27,7 @@ dotnet test
 
 ### Requirements
 
-- .NET SDK 8.0 or 9.0
+- .NET SDK 8.0, 9.0, or 10.0
 
 ---
 
@@ -123,7 +123,7 @@ All extension methods live on `ILogger` in the `Utilities.Logging` namespace.
 │           └── LoggingExtensions.cs
 ├── tests/
 │   └── Utilities.Tests/
-│       ├── Utilities.Tests.csproj    # net8.0 xUnit project
+│       ├── Utilities.Tests.csproj    # net10.0 xUnit project
 │       ├── Helpers/
 │       │   └── CapturingLogger.cs    # test-only ILogger
 │       └── Logging/
