@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Utilities.Auth</AssemblyName>
+    <RootNamespace>Utilities.Auth</RootNamespace>
+    <Description>Shared OAuth consumer library providing JWT infrastructure, provider abstractions, and ASP.NET Core authorization middleware.</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
+  </ItemGroup>
+
+</Project>
