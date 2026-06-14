@@ -16,7 +16,7 @@ public abstract class OAuthProviderConfig<T> : OAuthOptions, IValidateOptions<T>
     public string ProviderName { get; set; } = string.Empty;
 
     /// <inheritdoc />
-    public ValidateOptionsResult Validate(string? name, T options)
+    public virtual ValidateOptionsResult Validate(string? name, T options)
     {
         var errors = new List<string>();
 
