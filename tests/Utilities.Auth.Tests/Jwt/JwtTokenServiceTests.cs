@@ -250,6 +250,29 @@ public sealed class JwtTokenServiceTests
     }
 
     [Fact]
+    public async Task ValidateToken_returns_failure_for_not_yet_valid_token()
+    {
+        var (svc, _, clock) = BuildSut();
+        var issued = await svc.IssueTokenAsync(MakeUser());
+        // Rewind the clock to well before the token's not-before (issued at the default clock time).
+        clock.SetUtcNow(clock.GetUtcNow() - TimeSpan.FromHours(1));
+        var result = await svc.ValidateTokenAsync(issued.AccessToken);
+        result.IsValid.Should().BeFalse();
+        result.FailureReason.Should().Be(TokenValidationFailureReason.Unknown);
+    }
+
+    [Fact]
+    public async Task ValidateToken_rejects_unsigned_none_algorithm_token()
+    {
+        var (svc, _, _) = BuildSut();
+        var header = Base64UrlEncoder.Encode("{\"alg\":\"none\",\"typ\":\"JWT\"}");
+        var payload = Base64UrlEncoder.Encode("{\"iss\":\"test-issuer\",\"sub\":\"user-1\"}");
+        var noneToken = $"{header}.{payload}.";
+        var result = await svc.ValidateTokenAsync(noneToken);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task ValidateToken_succeeds_without_audience_when_audience_null()
     {
         var opts = ValidOptions(audience: null);

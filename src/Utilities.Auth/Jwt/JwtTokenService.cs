@@ -61,6 +61,7 @@ public sealed class JwtTokenService : ITokenService
             Issuer = _options.Issuer,
             Audience = _options.Audience,
             IssuedAt = now.UtcDateTime,
+            NotBefore = now.UtcDateTime,
             Expires = expires.UtcDateTime,
             SigningCredentials = _signingCredentials,
         };
@@ -107,16 +108,22 @@ public sealed class JwtTokenService : ITokenService
                 return MapException(msResult.Exception);
 
             var jwt = (JsonWebToken)msResult.SecurityToken!;
+            var now = _timeProvider.GetUtcNow();
+
+            // Lifetime is validated here against the injected TimeProvider rather than via the handler
+            // (ValidateLifetime is off) so expiry/not-before are deterministic and testable. Both bounds
+            // are checked — relying on the expiry check alone would let a not-yet-valid (future nbf) token pass.
+            DateTimeOffset? notBefore = jwt.ValidFrom != DateTime.MinValue
+                ? new DateTimeOffset(jwt.ValidFrom, TimeSpan.Zero)
+                : null;
+            if (notBefore.HasValue && now < notBefore.Value - _options.ClockSkew)
+                return TokenValidationResult.Failure(TokenValidationFailureReason.Unknown, $"Token is not valid before {notBefore.Value}.");
+
             DateTimeOffset? expiresAt = jwt.ValidTo != DateTime.MinValue
                 ? new DateTimeOffset(jwt.ValidTo, TimeSpan.Zero)
                 : null;
-
-            if (expiresAt.HasValue)
-            {
-                var now = _timeProvider.GetUtcNow();
-                if (now > expiresAt.Value + _options.ClockSkew)
-                    return TokenValidationResult.Failure(TokenValidationFailureReason.Expired, $"Token expired at {expiresAt.Value}.");
-            }
+            if (expiresAt.HasValue && now > expiresAt.Value + _options.ClockSkew)
+                return TokenValidationResult.Failure(TokenValidationFailureReason.Expired, $"Token expired at {expiresAt.Value}.");
 
             return TokenValidationResult.Success(new ClaimsPrincipal(msResult.ClaimsIdentity), expiresAt);
         }
@@ -153,6 +160,8 @@ public sealed class JwtTokenService : ITokenService
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = _signingCredentials.Key,
+        // Pin to HS256 so a token presenting any other (or "none") algorithm is rejected outright.
+        ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
         ValidateIssuer = true,
         ValidIssuer = _options.Issuer,
         ValidateAudience = _options.Audience is not null,
